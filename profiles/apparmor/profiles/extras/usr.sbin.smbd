@@ -1,45 +1,58 @@
-# ------------------------------------------------------------------
-#
-#    Copyright (C) 2002-2005 Novell/SUSE
-#
-#    This program is free software; you can redistribute it and/or
-#    modify it under the terms of version 2 of the GNU General Public
-#    License published by the Free Software Foundation.
-#
-# ------------------------------------------------------------------
-# vim:syntax=apparmor
-# Last Modified: Thu Aug 18 11:41:15 2005
-
 #include <tunables/global>
 
 /usr/sbin/smbd {
+  #include <abstractions/authentication>
   #include <abstractions/base>
-  #include <abstractions/bash>
+  #include <abstractions/consoles>
+  #include <abstractions/cups-client>
   #include <abstractions/nameservice>
+  #include <abstractions/samba>
+  #include <abstractions/user-tmp>
+  #include <abstractions/wutmp>
 
+  capability audit_write,
+  capability dac_override,
+  capability dac_read_search,
+  capability fowner,
+  capability lease,
   capability net_bind_service,
   capability setgid,
   capability setuid,
+  capability sys_admin,
   capability sys_resource,
+  capability sys_tty_config,
 
-  /etc/cups/client.conf r,
-  /etc/samba/dhcp.conf r,
-  /etc/samba/secrets.tdb rw,
-  /etc/samba/smb.conf r,
-  /etc/samba/smbpasswd rw,
-
-  @{HOME}/**  rwl,
-  @{HOMEDIRS} rwl,
-
+  /etc/mtab r,
+  /etc/netgroup r,
+  /etc/printcap r,
+  /etc/samba/* rwk,
   @{PROC}/@{pid}/mounts r,
-  /tmp rw,
-  /var/tmp rw,
-  /var/tmp/** lrw,
-  /usr/lib/samba/lowcase.dat r,
-  /usr/lib/samba/upcase.dat r,
-  /usr/lib/samba/valid.dat r,
-  /usr/sbin/smbd r,
-  /var/lib/samba/** rw,
-  /var/log/samba/log.smbd w,
-  /{,var/}run/samba/smbd.pid w,
+  @{PROC}/sys/kernel/core_pattern r,
+  /usr/lib*/samba/vfs/*.so mr,
+  /usr/lib*/samba/charset/*.so mr,
+  /usr/lib*/samba/auth/script.so mr,
+  /usr/lib*/samba/pdb/*.so mr,
+  /usr/lib*/samba/{lowcase,upcase,valid}.dat r,
+  /usr/lib/@{multiarch}/samba/*.so{,.[0-9]*} mr,
+  /usr/lib/@{multiarch}/samba/**/ r,
+  /usr/lib/@{multiarch}/samba/**/*.so{,.[0-9]*} mr,
+  /usr/sbin/smbd mr,
+  /usr/sbin/smbldap-useradd Px,
+  /var/cache/samba/** rwk,
+  /var/{cache,lib}/samba/printing/printers.tdb mrw,
+  /var/lib/samba/** rwk,
+  /var/lib/sss/pubconf/kdcinfo.* r,
+  /{,var/}run/dbus/system_bus_socket rw,
+  /{,var/}run/samba/** rk,
+  /{,var/}run/samba/ncalrpc/ rw,
+  /{,var/}run/samba/ncalrpc/** rw,
+  /{,var/}run/samba/smbd.pid rw,
+  /{,var/}run/samba/msg.lock/ rw,
+  /{,var/}run/samba/msg.lock/[0-9]* rwk,
+  /var/spool/samba/** rw,
+
+  @{HOMEDIRS}/** lrwk,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.sbin.smbd>
 }
