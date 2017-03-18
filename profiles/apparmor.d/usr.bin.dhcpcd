@@ -1,0 +1,78 @@
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+profile dhcpcd /{usr/,}bin/dhcpcd {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  capability chown,
+  capability net_admin,
+  capability net_raw,
+  capability sys_admin,
+
+  /etc/dhcpcd.{conf,duid,secret} r,
+  /etc/ld.so.cache r,
+  /etc/udev/udev.conf r,
+
+  /proc/*/net/if_inet6 r,
+  /proc/sys/net/ipv4/conf/*/* r,
+  /proc/sys/net/ipv6/conf/*/* r,
+
+  /run/dhcpcd.pid rwk,
+  /run/dhcpcd.sock rw,
+  /run/dhcpcd.unpriv.sock rw,
+  /run/udev/data/* r,
+
+  /sys/devices/*/*/net/*/uevent r,
+  /sys/devices/virtual/net/*/uevent r,
+
+  /usr/bin/dash ix,
+  /usr/bin/dash mrix,
+
+  /usr/lib/dhcpcd/dev/udev.so m,
+  /usr/lib/ld-2.25.so m,
+  /usr/lib/libc-2.25.so m,
+
+  # Transition to a child profile for hooks
+  /usr/libexec/dhcpcd-run-hooks Cx -> dhcpcd_run_hooks,
+
+  /var/db/dhcpcd-*.lease rw,
+  /{usr/,}bin/dhcpcd mrix,
+
+  # Child profile for hooks
+  profile dhcpcd_run_hooks {
+    #include <abstractions/base>
+    #include <abstractions/nameservice>
+
+    capability sys_admin,
+    capability sys_tty_config,
+
+    /etc/chrony.conf rw,
+    /etc/ntpd.conf rw,
+    /etc/resolv.conf rw,
+
+    /run/dhcpcd/{ntp,resolv}.conf.*.dhcp rw,
+    /run/dhcpcd/{ntp,resolv}.conf/ r,
+    /run/dhcpcd/{ntp,resolv}.conf/*.dhcp rw,
+
+    /usr/bin/cat mrix,
+    /usr/bin/cmp mrix,
+    /usr/bin/dash mr,
+    /usr/bin/hostname-coreutils mrix,
+    /usr/bin/mkdir mrix,
+    /usr/bin/rm mrix,
+    /usr/bin/sed mrix,
+
+    /usr/libexec/dhcpcd-hooks/ r,
+    /usr/libexec/dhcpcd-hooks/01-test r,
+    /usr/libexec/dhcpcd-hooks/02-dump r,
+    /usr/libexec/dhcpcd-hooks/20-resolv.conf r,
+    /usr/libexec/dhcpcd-hooks/30-hostname r,
+    /usr/libexec/dhcpcd-hooks/50-ntp.conf r,
+    /usr/libexec/dhcpcd-run-hooks r,
+  }
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.dhcpcd>
+}

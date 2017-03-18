@@ -1,0 +1,117 @@
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+/usr/bin/sshd {
+  #include <abstractions/authentication>
+  #include <abstractions/base>
+  #include <abstractions/consoles>
+  #include <abstractions/nameservice>
+  #include <abstractions/wutmp>
+
+  capability sys_chroot,
+  capability sys_resource,
+  capability sys_tty_config,
+  capability net_bind_service,
+  capability chown,
+  capability fowner,
+  capability kill,
+  capability setgid,
+  capability setuid,
+  capability audit_control,
+  capability audit_write,
+  capability dac_override,
+  capability dac_read_search,
+  capability sys_ptrace,
+
+  # sshd doesn't require net_admin. libpam-systemd tries to
+  # use it if available to set the send/receive buffers size,
+  # but will fall back to a non-privileged version if it fails.
+  deny capability net_admin,
+
+  # XXX: How often does it happen on void ? Could be put in local/usr.bin.sshd
+  # needed when /proc is mounted with hidepid>=1
+  #ptrace (read,trace) peer="unconfined",
+
+  /dev/ptmx rw,
+  /dev/pts/[0-9]* rw,
+  /dev/urandom r,
+
+  /etc/default/locale r,
+  /etc/environment r,
+  /etc/motd r,
+  /etc/security/** r,
+  /etc/ssh/** r,
+  /etc/ssl/openssl.cnf r,
+
+  @{HOME}/.ssh/authorized_keys{,2} r,
+
+  @{PROC}/@{pids}/fd/ r,  # pid of the just-logged in user's shell
+  owner @{PROC}/@{pid}/loginuid rw,
+  owner @{PROC}/@{pid}/limits r,
+  owner @{PROC}/@{pid}/uid_map r,
+  owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/oom_adj rw,
+  owner @{PROC}/@{pid}/oom_score_adj rw,
+
+  /usr/bin/sshd mrix,
+
+  # Shells available on void
+  /{usr/,}bin/ash      Uxr, # Available through busybox
+  /{usr/,}bin/bash     Uxr,
+  /{usr/,}bin/dash     Uxr,
+  /{usr/,}bin/fish     Uxr,
+  /{usr/,}bin/ksh      Uxr,
+  /{usr/,}bin/mksh     Uxr,
+  /{usr/,}bin/sh       Uxr,
+  /{usr/,}bin/tcsh     Uxr,
+  /{usr/,}bin/zsh      Uxr,
+  /{usr/,}sbin/nologin Uxr,
+  /{usr/,}bin/false    Uxr,
+
+  # XXX: this needs to be enabled otherwise we risk locking out a user
+  # Call passwd for password change when expired
+  /usr/bin/passwd Cx -> passwd,
+
+  # XXX: Should put all this in a subprofile
+  # for internal-sftp
+  /         r,
+  /**       r,
+  owner /** rwl,
+
+  /usr/libexec/sftp-server PUx,
+
+  # XXX: Need to review this subprofile
+  # to set memory protection for passwd
+  @{PROC}/@{pid}/task/@{pid}/attr/exec w,
+  profile passwd {
+    #include <abstractions/authentication>
+    #include <abstractions/base>
+    #include <abstractions/nameservice>
+
+    capability audit_write,
+    capability chown,
+    capability fsetid,
+    capability setuid,
+    capability setgid,
+
+    /usr/bin/passwd r,
+    /dev/pts/[0-9]* rw,
+    /{,var/}run/utmp rwk,
+
+    owner /etc/.pwd.lock rwk,
+    owner /etc/nshadow rw,
+    owner /etc/shadow  rw,
+    owner @{PROC}/@{pid}/loginuid r,
+
+    # XXX: put into another subprofile? or should this go out ?
+    /usr/bin/gnome-keyring-daemon ix,
+    capability ipc_lock,
+    owner @{PROC}/@{pid}/status r,
+    owner @{HOME}/.cache/keyring-*/        rw,
+    owner @{HOME}/.cache/keyring-*/control rw,
+  }
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.sshd>
+}
