@@ -16,8 +16,7 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
   /etc/udev/udev.conf r,
 
   /proc/*/net/if_inet6 r,
-  /proc/sys/net/ipv4/conf/*/* r,
-  /proc/sys/net/ipv6/conf/*/* r,
+  /proc/sys/net/ipv{4,6}/conf/*/* rw,
 
   /run/dhcpcd.pid rwk,
   /run/dhcpcd.sock rw,
@@ -52,11 +51,13 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
     /etc/ntpd.conf rw,
     /etc/resolv.conf rw,
 
+    /run/dhcpcd/ rw,
     /run/dhcpcd/{ntp,resolv}.conf.*.dhcp rw,
-    /run/dhcpcd/{ntp,resolv}.conf/ r,
+    /run/dhcpcd/{ntp,resolv}.conf/ rw,
     /run/dhcpcd/{ntp,resolv}.conf/*.dhcp rw,
 
     /usr/bin/cat mrix,
+    /usr/bin/chmod mrix,
     /usr/bin/cmp mrix,
     /usr/bin/dash mr,
     /usr/bin/hostname-coreutils mrix,
