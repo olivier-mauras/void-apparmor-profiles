@@ -23,6 +23,8 @@
 
   /run/nginx.pid rw,
 
+  /usr/bin/nginx mr,
+
   /usr/share/nginx/html/* r,
 
   /var/log/nginx/* w,
