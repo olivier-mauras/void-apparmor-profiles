@@ -1,0 +1,27 @@
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+/usr/bin/nginx {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/nis>
+  #include <abstractions/openssl>
+
+  capability setgid,
+  capability setuid,
+
+  /etc/nginx/*.conf r,
+  /etc/nginx/*_params r,
+  /etc/nginx/conf.d/* r,
+  /etc/nginx/mime.types r,
+
+  /run/nginx.pid rw,
+
+  /usr/share/nginx/html/* r,
+
+  /var/log/nginx/* w,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.nginx>
+}
