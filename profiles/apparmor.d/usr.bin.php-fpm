@@ -1,5 +1,10 @@
 # vim:syntax=apparmor
 
+# NOTE: This profile uses TCP sockets by default
+# If you wish for php-fpm to listen to unix socket,
+# add the following permission to local/usr.bin.php-fpm
+# /path/to/your/unix/socket w,
+
 #include <tunables/global>
 
 # This is PHP open_basedir where script can only be executed from.
