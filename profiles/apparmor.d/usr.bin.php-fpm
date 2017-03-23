@@ -30,6 +30,8 @@
   # to where your PHP app is located
   @{PHP_BASEDIRS}/** r,
 
+  /usr/bin/php-fpm mr,
+
   /usr/share/pear/** r,
   /usr/share/php/fpm/status.html r,
 
