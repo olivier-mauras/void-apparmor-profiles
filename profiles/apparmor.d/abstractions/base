@@ -111,7 +111,7 @@
   # Allow other processes to trace us by default (they will need 'trace' in
   # the first place). Administrators can override with:
   #   deny ptrace (tracedby) ...
-  ptrace (tracedby),
+  deny ptrace (tracedby),
 
   # Allow us to ptrace read ourselves
   ptrace (read) peer=@{profile_name},
