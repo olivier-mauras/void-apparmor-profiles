@@ -106,7 +106,7 @@
   # kcmp for now (they will need 'read' in the first place). Administrators can
   # override with:
   #   deny ptrace (readby) ...
-  ptrace (readby),
+  deny ptrace (readby),
 
   # Allow other processes to trace us by default (they will need 'trace' in
   # the first place). Administrators can override with:
