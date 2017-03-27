@@ -1,0 +1,12 @@
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+/usr/bin/uuidd {
+  #include <abstractions/base>
+  #include <abstractions/consoles>
+
+  /usr/bin/uuidd mr,
+
+  /run/uuidd/request w,
+}
