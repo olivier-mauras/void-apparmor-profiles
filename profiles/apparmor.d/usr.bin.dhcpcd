@@ -11,6 +11,10 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
   capability net_raw,
   capability sys_admin,
 
+  network packet dgram,
+  network inet raw,
+  network inet6 raw,
+
   /etc/dhcpcd.{conf,duid,secret} r,
   /etc/ld.so.cache r,
   /etc/udev/udev.conf r,

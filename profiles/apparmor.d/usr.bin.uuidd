@@ -6,7 +6,9 @@
   #include <abstractions/base>
   #include <abstractions/consoles>
 
+  network inet dgram,
+
   /usr/bin/uuidd mr,
 
-  /run/uuidd/request w,
+  /run/uuidd/request rw,
 }
