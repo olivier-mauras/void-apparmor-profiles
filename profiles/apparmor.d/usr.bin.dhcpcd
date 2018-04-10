@@ -22,25 +22,26 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
   /proc/*/net/if_inet6 r,
   /proc/sys/net/ipv{4,6}/conf/*/* rw,
 
-  /run/dhcpcd.pid rwk,
-  /run/dhcpcd.sock rw,
-  /run/dhcpcd.unpriv.sock rw,
-  /run/udev/data/* r,
+  /{var/,}run/dhcpcd{-*,}.pid rwk,
+  /{var/,}run/dhcpcd.sock rw,
+  /{var/,}run/dhcpcd.unpriv.sock rw,
+  /{var/,}run/udev/data/* r,
 
-  /sys/devices/*/*/net/*/uevent r,
+  /sys/devices/*/*/{*/,}net/*/uevent r,
   /sys/devices/virtual/net/*/uevent r,
 
-  /usr/bin/dash ix,
-  /usr/bin/dash mrix,
+  /{usr/,}bin/dash ix,
+  /{usr/,}bin/dash mrix,
 
   /usr/lib/dhcpcd/dev/udev.so m,
-  /usr/lib/ld-2.25.so m,
-  /usr/lib/libc-2.25.so m,
+  /usr/lib/ld-*.so m,
+  /usr/lib/libc-*.so m,
 
   # Transition to a child profile for hooks
   /usr/libexec/dhcpcd-run-hooks Cx -> dhcpcd_run_hooks,
 
   /var/db/dhcpcd-*.lease rw,
+  /var/db/dhcpcd/** rw,
   /{usr/,}bin/dhcpcd mrix,
 
   # Child profile for hooks
@@ -55,10 +56,10 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
     /etc/ntpd.conf rw,
     /etc/resolv.conf rw,
 
-    /run/dhcpcd/ rw,
-    /run/dhcpcd/{ntp,resolv}.conf.*.dhcp rw,
-    /run/dhcpcd/{ntp,resolv}.conf/ rw,
-    /run/dhcpcd/{ntp,resolv}.conf/*.dhcp rw,
+    /{var/,}run/dhcpcd/ rw,
+    /{var/,}run/dhcpcd/{ntp,resolv}.conf.** rw,
+    /{var/,}run/dhcpcd/{ntp,resolv}.conf/ rw,
+    /{var/,}run/dhcpcd/{ntp,resolv}.conf/*.dhcp rw,
 
     /usr/bin/cat mrix,
     /usr/bin/chmod mrix,
@@ -70,12 +71,10 @@ profile dhcpcd /{usr/,}bin/dhcpcd {
     /usr/bin/sed mrix,
 
     /usr/libexec/dhcpcd-hooks/ r,
-    /usr/libexec/dhcpcd-hooks/01-test r,
-    /usr/libexec/dhcpcd-hooks/02-dump r,
-    /usr/libexec/dhcpcd-hooks/20-resolv.conf r,
-    /usr/libexec/dhcpcd-hooks/30-hostname r,
-    /usr/libexec/dhcpcd-hooks/50-ntp.conf r,
+    /usr/libexec/dhcpcd-hooks/* r,
     /usr/libexec/dhcpcd-run-hooks r,
+
+    /usr/share/dhcpcd/hooks/* r,
   }
 
   # Site-specific additions and overrides. See local/README for details.
